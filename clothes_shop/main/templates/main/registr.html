@@ -1,0 +1,86 @@
+
+{% block title %}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+<div class="container">
+  <h2 class="my-4">Реєстрація нового користувача</h2>
+  <form method="post" class="needs-validation" novalidate>
+    {% csrf_token %}
+
+    <div class="form-group">
+      {{ form.username.label_tag }}
+      {{ form.username }}
+      <div class="invalid-feedback">
+        {{ form.username.errors }}
+      </div>
+    </div>
+    <div class="form-group">
+      {{ form.email.label_tag }}
+      {{ form.email }}
+      <div class="invalid-feedback">
+        {{ form.email.errors }}
+      </div>
+    </div>
+    <div class="form-group">
+      {{ form.password1.label_tag }}
+      {{ form.password1 }}
+      <div class="invalid-feedback">
+        {{ form.password1.errors }}
+      </div>
+    </div>
+    <div class="form-group">
+      {{ form.password2.label_tag }}
+      {{ form.password2 }}
+      <div class="invalid-feedback">
+        {{ form.password2.errors }}
+      </div>
+    </div>
+
+
+    <button type="submit" class="btn btn-primary">Зареєструватись</button>
+
+  {% if username %}
+    <div class="alert alert-success mt-4" role="alert">
+      Ласкаво просимо, {{ username }}!
+    </div>
+  {% endif %}
+</div>
+
+<div id="recaptcha-container"></div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+        integrity="sha256-jpUEdgiBjKXL/XZlY/j1wkk3FqArzDWkwMAy/9s/0nI=" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+<script>
+  var appVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+
+  $('form').on('submit', function (event) {
+    event.preventDefault();
+
+    var $form = $(this);
+    var phoneNumber = $form.find('#id_phone_number').val();
+    var app = firebase.app();
+
+    appVerifier.verify()
+      .then(function () {
+        firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
+          .then(function (confirmationResult) {
+            var code = window.prompt('Введите код подтверждения:');
+            return confirmationResult.confirm(code);
+          })
+          .then(function (result) {
+            window.location.href = "/registration-success/";
+          })
+          .catch(function (error) {
+            // Обработайте ошибку подтверждения
+          });
+      });
+  });
+</script>
+{% endblock %}
